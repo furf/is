@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+	<title></title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+
+	<!--<link rel="stylesheet" href="css/style.css">-->
+  <style type="text/css" media="screen">
+  body { font:11px/1.5 helvetica,arial,sans-serif;}
+  table { border-collapse:collapse; }
+  th, td { border:1px solid #ccc; padding:0.25em; }
+  th { text-align:left; }
+  td { text-align:center; }
+  .false { color:#fff; }
+  .true { color: green; }
+  tr.hover > td, tr.hover > th, td.hover { background:#eee; }
+  tr.hover > td.hover { background:#fff;}
+  </style>
+</head>
+<body>
+
+<div id="container">
+  <header>
+    
+  </header>
+  <div id="main" role="main">
+    
+  </div>
+  <footer>
+
+  </footer>
+</div>
+
+<script src="http://assets.sandbox.dev/js/jquery/jquery-1.6.2.min.js"></script>
+<script src="is.js"></script>
+<script>
+(function (window, document, $) {
+  
+  function create (obj) {
+    function F () {}
+    F.prototype = obj;
+    return new F;
+  }
+  
+  var values = {
+    'Arguments (empty)':                    (function () { return arguments; })(),
+    'Arguments (non-empty)':                (function () { return arguments; })(1),
+    'Array (empty)':                        [],
+    'Array (non-empty)':                    [1, 2, 'a', true],
+    'Boolean (false)':                      false,
+    'Boolean (true)':                       true,
+    'Boolean (object, false)':              new Boolean(false),
+    'Boolean (object, true)':               new Boolean(true),
+    'Date':                                 new Date,
+    'Date (0)':                             new Date(0),
+    'Date (invalid)':                       new Date('WTF'),
+    'Document':                             document,
+    'Element':                              document.createElement('a'),
+    'Error':                                new Error('Oops!'),
+    'Error (TypeError)':                    new TypeError('Oops! I did it again.'),
+    'Function':                             function () {},
+    'Math':                                 Math,
+    'NaN':                                  NaN,
+    'Null':                                 null,
+    'Number (zero)':                        0,
+    'Number (non-zero)':                    42,
+    'Number (object, zero)':                new Number(0),
+    'Number (object, non-zero)':            new Number(42),
+    'Object (empty)':                       {},
+    'Object (non-empty)':                   { foo: 'bar' },
+    'Object (instance)':                    new (function () {}),
+    'Object (subclass instance)':           create(new (function () {})),
+    'Object (create instance, empty)':      create({}),
+    'Object (create instance, non-empty)':  create({ foo: 'bar' }),
+    'RegExp':                               /[a-z]/g,
+    'String (empty)':                       '',
+    'String (non-empty)':                   ':)',
+    'String (object, empty)':               new String(''),    
+    'String (object, non-empty)':           new String(':)'),    
+    'String (date m/dd/yyyy)':              '3/13/1973',
+    'String (date month dd, yyyy)':         'March 13, 1973',
+    'String (invalid date)':                'This is not a date.',
+    'Undefined':                            undefined,
+    'Window':                               window,
+    'Window (iframe)':                      $('<iframe/>').hide().appendTo('body')[0].contentWindow
+  };
+
+  function toResult (value) {
+    switch (value) {
+      case true:  return '&#10004;';
+      case false: return '&#10008;';
+      default: return value + '';
+    }
+  }
+
+  var $table = $('<table/>'),
+      $caption = $('<caption>is.#()</caption>').appendTo($table)
+      $thead = $('<thead/>').appendTo($table),
+      $theadTr = $('<tr/>')
+        .append('<th class="Type">Type</th><th class="Value">Value</th>')
+        .delegate('th', 'click', function () {
+          $table.find('th, td')
+            .not('.Type, .Value, .' + this.className)
+            .toggle();
+        })
+        .appendTo($thead),
+
+      $tbody = $('<tbody/>').appendTo($table);
+      
+  $.each(is, function (description) {
+    $('<th/>', { text: description })
+      .addClass(description)
+      .appendTo($theadTr);
+  });
+  
+  $.each(values, function (name, value) {
+
+    var $tr = $('<tr/>')
+      .hover(function () {
+        $tr.addClass('hover');
+      }, function () {
+        $tr.removeClass('hover');
+      })
+      .appendTo($tbody);
+
+    $('<th/>', { text: name })
+      .addClass('Type')
+      .appendTo($tr);
+
+    $('<th/>', { text: value + '' })
+      .addClass('Value')
+      .appendTo($tr);
+
+    $.each(is, function (description, test) {
+      var result = test(value);
+
+      $('<td/>', { html: toResult(result) })
+        .addClass(description)
+        .addClass(result.toString())
+        .hover(function () {
+          $('.' + description).addClass('hover');
+        }, function () {
+          $('.' + description).removeClass('hover');
+        })
+        .appendTo($tr);
+    });
+
+  });
+  
+  $table.appendTo('#main');
+  
+})(this, document, jQuery);
+</script>
+
+</body>
+</html>
